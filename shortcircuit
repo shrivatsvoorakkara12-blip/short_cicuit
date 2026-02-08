@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Short Circuit - Gaming Gear Store</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin:0; padding:0; }
+    header, footer { background:#222; color:#fff; padding:15px; text-align:center; }
+    nav a { margin:0 10px; color:#fff; text-decoration:none; }
+    .catalogue { display:flex; flex-wrap:wrap; padding:20px; }
+    .product { width:23%; margin:1%; border:1px solid #ccc; padding:10px; border-radius:5px; }
+    .product img { width:100%; height:auto; }
+    .cart { padding:20px; }
+    .about { padding:20px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>⚡ Short Circuit ⚡</h1>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#catalogue">Catalogue</a>
+      <a href="#cart">Cart</a>
+      <a href="#about">About Us</a>
+    </nav>
+  </header>
+
+  <section id="home">
+    <h2>Welcome to Short Circuit</h2>
+    <p>Gaming gear with speed, precision, and style — all priced with a fair 30% profit margin.</p>
+  </section>
+
+  <section id="catalogue" class="catalogue"></section>
+
+  <section id="cart" class="cart">
+    <h2>Your Cart</h2>
+    <ul id="cartItems"></ul>
+    <button id="rzp-button1">Checkout with Razorpay</button>
+  </section>
+
+  <section id="about" class="about">
+    <h2>About Us</h2>
+    <p>Short Circuit is your one‑stop gaming gear hub, delivering high‑performance mice, mechanical keyboards, immersive headsets, and essential accessories. Every product is carefully selected for gamers who demand speed, precision, and style — all priced with a fair 30% profit margin.</p>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 Short Circuit</p>
+  </footer>
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    // Generate 100 products
+    const products = [];
+    const categories = ["Mouse","Keyboard","Headset","Accessory"];
+    for(let i=1;i<=100;i++){
+      let category = categories[(i-1)%4];
+      let cost = 1000 + (i*50); // sample cost
+      let price = Math.round(cost*1.3); // 30% profit
+      products.push({
+        id:i,
+        name: category+" Product "+i,
+        category: category,
+        cost: cost,
+        price: price,
+        description: "High quality "+category+" for gamers.",
+        images: ["img1.jpg","img2.jpg","img3.jpg","img4.jpg"]
+      });
+    }
+
+    // Render catalogue
+    const catalogue = document.getElementById("catalogue");
+    products.forEach(p=>{
+      const div=document.createElement("div");
+      div.className="product";
+      div.innerHTML=`
+        <h3>${p.name}</h3>
+        <img src="${p.images[0]}" alt="${p.name}">
+        <p>${p.description}</p>
+        <p>Cost Price: ₹${p.cost}</p>
+        <p><strong>Selling Price (30% profit): ₹${p.price}</strong></p>
+        <div>
+          <img src="${p.images[0]}" alt="view1">
+          <img src="${p.images[1]}" alt="view2">
+          <img src="${p.images[2]}" alt="view3">
+          <img src="${p.images[3]}" alt="view4">
+        </div>
+        <button onclick="addToCart(${p.id})">Add to Cart</button>
+      `;
+      catalogue.appendChild(div);
+    });
+
+    // Cart logic
+    let cart=[];
+    function addToCart(id){
+      const product=products.find(p=>p.id===id);
+      cart.push(product);
+      renderCart();
+    }
+    function renderCart(){
+      const cartItems=document.getElementById("cartItems");
+      cartItems.innerHTML=cart.map(p=>`<li>${p.name} - ₹${p.price}</li>`).join("");
+    }
+
+    // Razorpay checkout
+    document.getElementById('rzp-button1').onclick = function(e){
+      let total=cart.reduce((sum,p)=>sum+p.price,0)*100; // in paise
+      var options = {
+        "key": "YOUR_RAZORPAY_KEY_ID",
+        "amount": total,
+        "currency": "INR",
+        "name": "Short Circuit",
+        "description": "Purchase of gaming products",
+        "handler": function (response){
+            alert("Payment successful! ID: " + response.razorpay_payment_id);
+        },
+        "prefill": {
+            "name": "Customer Name",
+            "email": "customer@example.com",
+            "contact": "9999999999"
+        },
+        "theme": {
+            "color": "#3399cc"
+        }
+      };
+      var rzp1 = new Razorpay(options);
+      rzp1.open();
+      e.preventDefault();
+    }
+  </script>
+</body>
+</html>
